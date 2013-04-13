@@ -228,7 +228,7 @@ func main() {
 	_, err := flags.Parse(&opts)
 	if err != nil {
 		if err.(*flags.Error).Type == flags.ErrHelp {
-			fmt.Printf("example: %s -f 00:01:33,492 -l 01:39:23,561 -i sub.srt\n",
+			fmt.Printf("Example:\n  %s -f 00:01:33,492 -l 01:39:23,561 -i sub.srt\n",
 				path.Base(os.Args[0]))
 			os.Exit(0)
 		}
