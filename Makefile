@@ -1,8 +1,10 @@
+GOPATH ?= $(PWD)/godir
+
 all: subsync
 
 subsync: subsync.go
-	go get .
-	go build subsync.go
+	GOPATH="$(GOPATH)" go get .
+	GOPATH="$(GOPATH)" go build subsync.go
 
 clean:
-	rm -f subsync
+	rm -rf subsync godir
