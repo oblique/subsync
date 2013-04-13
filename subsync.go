@@ -189,11 +189,27 @@ func sync_subs(subs *list.List, synced_first_ms uint, synced_last_ms uint) {
 	desynced_first_ms := subs.Front().Value.(*subtitle).start
 	desynced_last_ms := subs.Back().Value.(*subtitle).start
 
+	/* m = (y2 - y1) / (x2 - x1)
+	 * m: slope
+	 * y2: synced_last_ms
+	 * y1: synced_first_ms
+	 * x2: desynced_last_ms
+	 * x1: desynced_first_ms */
 	slope = float64(synced_last_ms - synced_first_ms) / float64(desynced_last_ms - desynced_first_ms)
+	/* b = y - mx
+	 * b: yint
+	 * y: synced_last_ms
+	 * m: slope
+	 * x: desynced_last_ms */
 	yint = float64(synced_last_ms) - slope * float64(desynced_last_ms)
 
 	for e := subs.Front(); e != nil; e = e.Next() {
 		sub := e.Value.(*subtitle)
+		/* y = mx + b
+		 * y: sub.start and sub.end
+		 * m: slope
+		 * x: sub.start and sub.end
+		 * b: yint */
 		sub.start = uint(roundFloat64(slope * float64(sub.start) + yint))
 		sub.end = uint(roundFloat64(slope * float64(sub.end) + yint))
 	}
