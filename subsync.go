@@ -64,12 +64,11 @@ func msecs_to_time(msecs uint) string {
 	var h, m, s, ms uint
 
 	h = msecs / (60 * 60 * 1000)
-	msecs = msecs % (60 * 60 * 1000)
+	msecs %= 60 * 60 * 1000
 	m = msecs / (60 * 1000)
-	msecs = msecs % (60 * 1000)
+	msecs %= 60 * 1000
 	s = msecs / 1000
-	msecs = msecs % 1000
-	ms = msecs
+	ms = msecs % 1000
 
 	tm := fmt.Sprintf("%02d:%02d:%02d,%03d", h, m, s, ms)
 
