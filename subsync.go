@@ -14,6 +14,11 @@ import (
 	"github.com/jessevdk/go-flags"
 )
 
+
+const (
+	version = "0.1"
+)
+
 type subtitle struct {
 	text string
 	start uint
@@ -220,8 +225,9 @@ func main() {
 	var opts struct {
 		FirstTm string `short:"f" long:"first-sub" description:"Time of first subtitle"`
 		LastTm string `short:"l" long:"last-sub" description:"Time of last subtitle"`
-		InputFl string `short:"i" long:"input" description:"Input file" required:"true"`
+		InputFl string `short:"i" long:"input" description:"Input file"`
 		OutputFl string `short:"o" long:"output" description:"Output file"`
+		PrintVersion bool `short:"v" long:"version" description:"Print version"`
 	}
 
 	_, err := flags.Parse(&opts)
@@ -232,6 +238,16 @@ func main() {
 				path.Base(os.Args[0]))
 			os.Exit(0)
 		}
+		os.Exit(1)
+	}
+
+	if opts.PrintVersion {
+		fmt.Printf("subsync v%s\n", version)
+		os.Exit(0)
+	}
+
+	if opts.InputFl == "" {
+		fmt.Fprintf(os.Stderr, "You must specify an input file with -i option.\n")
 		os.Exit(1)
 	}
 
