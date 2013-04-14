@@ -123,7 +123,6 @@ func read_srt(filename string) (*list.List, error) {
 			}
 			_, err = strconv.ParseUint(id[0], 10, 0)
 			if err != nil {
-				return nil, err
 				return nil, errors.New("Parsing error: Wrong file format")
 			}
 			state = 1
