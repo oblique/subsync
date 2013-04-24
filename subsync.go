@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"errors"
 	"strings"
-	"strconv"
 	"math"
 	"os"
 	"path"
@@ -111,19 +110,12 @@ func read_srt(filename string) (*list.List, error) {
 			ln = append(ln, line...)
 		}
 
-		/* parse subtitle id */
 		if state == 0 {
-			/* avoid false-positive parsing error */
-			if err == io.EOF && len(ln) == 0 {
-				break;
-			}
-			id := strings.Split(string(ln), " ")
-			if len(id) != 1 {
-				return nil, errors.New("Parsing error: Wrong file format")
-			}
-			_, err = strconv.ParseUint(id[0], 10, 0)
-			if err != nil {
-				return nil, errors.New("Parsing error: Wrong file format")
+			if len(ln) == 0 {
+				if err == io.EOF {
+					break;
+				}
+				continue;
 			}
 			state = 1
 		/* parse start, end times */
