@@ -1,6 +1,6 @@
-subsync is a simple CLI tool written in Go, that synchronizes SubRip
-(srt) subtitles automatically. You only have to know when the first
-and the last subtitle must be shown.
+subsync is a simple CLI tool that synchronizes SubRip (srt) subtitles
+automatically. You only have to know when the first and the last
+subtitle should be shown.
 
 ## examples
 

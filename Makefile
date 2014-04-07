@@ -1,10 +1,11 @@
-GOPATH ?= $(PWD)/godir
+CC := gcc
+CFLAGS += -Wall -Wextra -std=gnu99 -O2
+LIBS := -lm
 
 all: subsync
 
-subsync: subsync.go
-	GOPATH="$(GOPATH)" go get -d .
-	GOPATH="$(GOPATH)" go build -o $@ subsync.go
+subsync: subsync.c list.h
+	$(CC) $(CFLAGS) $(LDFLAGS) $< $(LIBS) -o $@
 
 clean:
-	rm -rf subsync godir
+	@rm -f subsync
