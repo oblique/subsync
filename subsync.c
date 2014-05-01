@@ -230,7 +230,7 @@ void write_srt(FILE *fout, struct list_head *srt_head)
 }
 
 /* synchronize subtitles by knowing the start time of the first and the last subtitle.
- * to archive this we must use the linear equation: y = mx + b */
+ * to achieve this we must use the linear equation: y = mx + b */
 void sync_srt(struct list_head *srt_head, msec_t synced_first, msec_t synced_last)
 {
 	long double slope, yint;
