@@ -13,6 +13,7 @@
 #define SUB_MAX_BUF 1024
 
 typedef uint64_t msec_t;
+typedef int64_t shift_t;
 #define PRImsec PRIu64
 
 struct srt_sub {
@@ -229,6 +230,35 @@ void write_srt(FILE *fout, struct list_head *srt_head)
 	}
 }
 
+/* perform shift on every subtitle line by 'shift' milliseconds */
+void shift_srt(struct list_head *srt_head, shift_t shift)
+{
+	struct list_head *pos;
+	struct srt_sub   *sub;
+
+	assert(srt_head != NULL);
+
+	msec_t tmp_start;
+	msec_t tmp_end;
+
+	list_for_each(pos, srt_head) {
+		sub = list_entry(pos, struct srt_sub, list);
+
+		tmp_start = sub->start + shift;
+		tmp_end   = sub->end   + shift;
+
+		if ((shift < 0) && (tmp_start > sub->start)) {
+			sub->start = 0;
+
+			if (tmp_end > 0)
+				sub->end = 0;
+		} else {
+			sub->start = tmp_start;
+			sub->end   = tmp_end;
+		}
+	}
+}
+
 /* synchronize subtitles by knowing the start time of the first and the last subtitle.
  * to achieve this we must use the linear equation: y = mx + b */
 void sync_srt(struct list_head *srt_head, msec_t synced_first, msec_t synced_last)
@@ -282,13 +312,17 @@ void usage(void)
 	fprintf(stderr, "  -i, --input          Input file\n");
 	fprintf(stderr, "  -o, --output         Output file");
 	fprintf(stderr, " (if not specified, it overwrites the input file)\n");
+	fprintf(stderr, "  -s, --shift          Shift N milliseconds");
+	fprintf(stderr, " (can be negative)\n");
 	fprintf(stderr, "  -v, --version        Print version\n");
 	fprintf(stderr, "\nExample:\n");
 	fprintf(stderr, "  subsync -f 00:01:33,492 -l 01:39:23,561 -i file.srt\n");
+	fprintf(stderr, "  subsync -s -20 -i file.srt\n");
 }
 
 #define FLAG_F (1 << 0)
 #define FLAG_L (1 << 1)
+#define FLAG_S (1 << 2)
 
 int main(int argc, char *argv[])
 {
@@ -296,6 +330,7 @@ int main(int argc, char *argv[])
 	unsigned int flags = 0;
 	msec_t first_ms, last_ms;
 	char *input_path = NULL, *output_path = NULL;
+	shift_t shift = 0;
 	FILE *fin = stdin, *fout = stdout;
 	int res;
 
@@ -314,11 +349,12 @@ int main(int argc, char *argv[])
 			{"last-sub",	required_argument,	0, 'l'},
 			{"input",	required_argument,	0, 'i'},
 			{"output",	required_argument,	0, 'o'},
+			{"shift",	required_argument,	0, 's'},
 			{"version",	required_argument,	0, 'v'},
 			{ 0,		0,			0,   0}
 		};
 
-		c = getopt_long(argc, argv, "f:l:i:o:hv", long_options, &option_index);
+		c = getopt_long(argc, argv, "f:l:i:o:s:hv", long_options, &option_index);
 		if (c == -1)
 			break;
 
@@ -343,6 +379,10 @@ int main(int argc, char *argv[])
 			break;
 		case 'o':
 			output_path = optarg;
+			break;
+		case 's':
+			flags |= FLAG_S;
+			shift = atol(optarg);
 			break;
 		case 'v':
 			printf("%s\n", VERSION);
@@ -392,7 +432,11 @@ int main(int argc, char *argv[])
 		last_ms = list_last_entry(&subs_head, struct srt_sub, list)->start;
 
 	/* sync subtitles */
-	sync_srt(&subs_head, first_ms, last_ms);
+	if ((flags & FLAG_S) && !(flags & FLAG_L) && !(flags & FLAG_F)) {
+		shift_srt(&subs_head, shift);
+	} else {
+		sync_srt(&subs_head, first_ms, last_ms);
+	}
 
 	/* write subtitles */
 	if (strcmp(output_path, "-") != 0)
